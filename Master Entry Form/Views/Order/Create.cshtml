@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+<head>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js">
+    </script>
+</head>
+
+<h2>Master Details entry form</h2>
+<div class="container" style="max-width:640px">
+    <div class="master">
+        <h4>Order details</h4>
+        <table>
+            <tr>
+                <td>Order No</td>
+                <td>
+                    <input type="text" id="orderNo" />
+                    <span></span>
+                   
+                </td>
+                <td>Order Date</td>
+                <td>
+                    <input type="text" id="orderDate" />
+                   
+                </td>
+            </tr>
+            <tr>
+              
+            </tr>
+        </table>
+    </div>
+    <div class="details">
+        <h4>Order Items</h4>
+        <table width="100%">
+            <tr>
+                <td>Item Name</td>
+                <td>Quantity</td>
+                <td>Rate</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>
+                    <input type="text" id="itemName" />
+                </td>
+                <td>
+                    <input type="text" id="quantity" />
+                </td>
+                <td>
+                    <input type="text" id="rate" />
+                </td>
+                <td>
+                    <input type="button" id="add" value="add" />
+                </td>
+            </tr>
+        </table>
+        <div id="orderItems" class="tablecontainer">
+        </div>
+        <div style="padding:10px 0px; text-align:right">
+            <input id="submit" type="button" value="Save" style="padding:10px 20px" />
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        //Date Picker
+        $(function () {
+            $('#orderDate').datepicker({
+                dateFormat: 'mm-dd-yy'
+            });
+        });
+
+        $(document).ready(function () {
+            var orderItems = [];
+            //Add button click function
+            $('#add').click(function () {
+                
+                    orderItems.push({
+                        ItemName: $('#itemName').val().trim(),
+                Quentity: parseInt($('#quantity').val().trim()),
+                        Rate: parseFloat($('#rate').val().trim()),
+                        Total: parseInt($('#quantity').val().trim()) * parseFloat($('#rate').val().trim())
+                    });
+
+                    //Clear fields
+                    $('#itemName').val('').focus();
+                    $('#quantity,#rate').val('');
+
+                
+                //populate order items
+                GeneratedItemsTable();
+
+            });
+            //Save button click function
+            $('#submit').click(function () {
+               
+                    var data = {
+                OrderNo: $('#orderNo').val().trim(),
+                Date: $('#orderDate').val().trim(),
+                OrderDetails: orderItems
+                    }
+
+                    $(this).val('Please wait...');
+
+                    $.ajax({
+                    url: "@Url.Action("Create", "Order")",
+                        type: "POST",
+                        data: JSON.stringify(data),
+                        dataType: "JSON",
+                        contentType: "application/json",
+                        success: function (d) {
+                            if (d.status == true) {
+                                alert('Successfully done.');
+                                //clear form
+                                orderItems = [];
+                                $('#orderNo').val('');
+                                $('#orderDate').val('');
+                                $('#orderItems').empty();
+                            }
+                            else {
+                                alert('Failed');
+                            }
+                            $('#submit').val('Save');
+                        },
+                        error: function () {
+                            alert('Error. Please try again.');
+                            $('#submit').val('Save');
+                        }
+                    });
+                
+
+            });
+            //function for show added items in table
+            function GeneratedItemsTable() {
+                if (orderItems.length > 0) {
+                    var $table = $('<table/>');
+                    $table.append('<thead><tr><th>Item</th><th>Quantity</th><th>Rate</th><th>Total</th><th></th></tr></thead>');
+                    var $tbody = $('<tbody/>');
+                    $.each(orderItems, function (i, val) {
+                        var $row = $('<tr/>');
+                        $row.append($('<td/>').html(val.ItemName));
+                        $row.append($('<td/>').html(val.Quantity));
+                        $row.append($('<td/>').html(val.Rate));
+                        $row.append($('<td/>').html(val.Total));
+                        var $remove = $('<a href="#">Remove</a>');
+                        $remove.click(function (e) {
+                            e.preventDefault();
+                            orderItems.splice(i, 1);
+                            GeneratedItemsTable();
+                        });
+                        $row.append($('<td/>').html($remove));
+                        $tbody.append($row);
+                    });
+                    console.log("current", orderItems);
+                    $table.append($tbody);
+                    $('#orderItems').html($table);
+                }
+                else {
+                    $('#orderItems').html('');
+                }
+            }
+        });
+
+    </script>
+
+
+<style>
+
+
+
+    /*css for table*/
+    .container td {
+        vertical-align: top;
+    }
+
+    .tablecontainer table {
+        width: 100%;
+        border-collapse: collapse;
+        border-top: 1px solid #BFAEAE;
+        border-right: 1px solid #BFAEAE;
+    }
+
+    .tablecontainer th {
+        border-bottom: 2px solid #BFAEAE !important;
+    }
+
+    .tablecontainer th, .tablecontainer td {
+        text-align: left;
+        border-left: 1px solid #BFAEAE;
+        padding: 5px;
+        border-bottom: 1px solid #BFAEAE;
+    }
+
+    .ui-widget {
+        font-size: 12px !important;
+    }
+</style>

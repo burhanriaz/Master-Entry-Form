@@ -1,0 +1,57 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Orders</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+</head>
+<body>
+    <h1> Orders</h1>
+    <div class="container">
+        <table id="orders-table" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>OrderNo</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $.ajax({
+                type: "GET",
+                url: "@Url.Action("Index", "Order")",
+                dataType: "json",
+                success: function (data) {
+                    var rows = "";
+                    $.each(data, function (index, item) {
+                        rows += "<tr>";
+                        rows += "<td>" + item.OrderNo + "</td>";
+                        rows += "<td>" + item.Date + "</td>";
+                        rows += "<td>";
+                        rows += "<a href='#' class='btn btn-primary btn-sm'>Edit</a> ";
+                        rows += "<a href='#' class='btn btn-danger btn-sm'>Delete</a>";
+                        rows += "</td>";
+                        rows += "</tr>";
+                    });
+                    $("#orders-table tbody").append(
+                        rows);
+                },
+                error: function (xhr, status, error) {
+                    alert("An error occurred while retrieving the orders.");
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
